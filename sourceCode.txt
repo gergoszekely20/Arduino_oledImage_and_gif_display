@@ -1,0 +1,50 @@
+ARDUINO:
+
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SH110X.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+void setup()
+{
+  Serial.begin(9600);
+  delay(250);
+  display.begin(0x3c, true); 
+  display.clearDisplay();
+}
+
+void loop()
+{
+    uint8_t picture[1024];
+    Serial.readBytes(picture, sizeof(picture));
+    display.drawBitmap(0, 0, picture, SCREEN_WIDTH, SCREEN_HEIGHT, 1);
+    display.display();
+
+}
+
+PYTHON:
+
+import serial
+import time
+from PIL import Image
+
+image_path = "D:\\Egyetem\\PMP\\PROJECT\\whale.jpg"
+output_bitmap_path = "D:\\Egyetem\\PMP\\PROJECT\\picture_bitmap.bmp"
+
+image = Image.open(image_path)
+resized_image = image.resize((128, 64))
+bitmap = resized_image.convert("1")
+bitmap.save(output_bitmap_path, "BMP")
+
+bitmap_bytes = bytearray(bitmap.tobytes())
+
+ser = serial.Serial('COM12', 9600)
+time.sleep(2)
+ser.write(bitmap_bytes)
+ser.close()
+
+
